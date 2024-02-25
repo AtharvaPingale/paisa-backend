@@ -50,7 +50,8 @@ def chat():
             Use the following key format for the response:
             {
                 store_name: 'name_of_the_store',
-                subtotal: 'total_invoice_amount',
+                store_address: 'address_of_the_store',
+                subtotal: 'total_invoice_amount_including_tax',
                 tax: 'tax_in_the_receipt',    
                 invoice_date: "date_printed_on_invoice"
                 invoice_number: "invoice_unique_id",
