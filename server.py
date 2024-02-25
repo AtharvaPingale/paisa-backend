@@ -65,14 +65,14 @@ def chat():
                 ]
             }
             If any field is not found, leave it as blank. Do not add tax, balance, savings in items. Do not invent any items.
-            DO NOT include anything else other than the JSON, including any variable name. Also do not include 'json' at the start of the response.
+            DO NOT include anything else other than the JSON, including any variable name and extra spaces. Also do not include 'json' at the start of the response.
             Do not include any string formatting.
             Wrap the answer in triple quotes (") to use in python and not in ticks (`).
             """,
             image_parts[0]
         ]  
         retry = 3
-        res = "{}"
+        res = """{}"""
         while(retry > 0):
             response = model.generate_content(prompt_parts)
             print(response.text)
