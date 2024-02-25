@@ -45,7 +45,7 @@ def chat():
             """
             You are an expert in understanding invoices.
             You will receive a single input image as invoice &
-            you will have to convert the invoice image into JSON format. 
+            you will have to convert the invoice image into valid JSON format. 
             If the image is not recognized as invoice, respond with black JSON object with the template format.
             Use the following key format for the response:
             {
@@ -70,12 +70,25 @@ def chat():
             """,
             image_parts[0]
         ]  
-
-
-        response = model.generate_content(prompt_parts)
-        print(response.text)
-        res = json.loads(response.text)
+        retry = 3
+        while(retry > 0):
+            response = model.generate_content(prompt_parts)
+            print(response.text)
+            if is_json(response.text):
+               res = json.loads(response.text) 
+               retry = 0
+            else:
+               retry =- 1
+               if(retry == 0):
+                  return jsonify({"error": "Could not read the image"})
         return res
+    
+def is_json(myjson):
+  try:
+    json.loads(myjson)
+  except ValueError as e:
+    return False
+  return True
     
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
