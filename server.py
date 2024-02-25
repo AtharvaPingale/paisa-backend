@@ -17,6 +17,7 @@ app.debug = True
 cors = CORS(app)
 
 model = genai.GenerativeModel(model_name="gemini-pro-vision")
+model_text = genai.GenerativeModel(model_name="gemini-pro")
 
 @app.route('/', methods=['GET'])
 def hello_world():
@@ -71,19 +72,38 @@ def chat():
             """,
             image_parts[0]
         ]  
-        retry = 3
-        res = """{}"""
-        while(retry > 0):
-            response = model.generate_content(prompt_parts)
-            print(response.text)
+
+        json_prompt = """ 
+            The following response was not parsed as a JSON object. Reformat the response in JSON format.
+            Use the following key format for the JSON object:
+            {
+                store_name: 'name_of_the_store',
+                store_address: 'address_of_the_store',
+                subtotal: 'total_invoice_amount_including_tax',
+                tax: 'tax_in_the_receipt',    
+                invoice_date: "date_printed_on_invoice"
+                invoice_number: "invoice_unique_id",
+                invoice_time: "time_printed_on_invoice",
+                items:[
+                    {
+                        id: 'number_in_the_list',
+                        item_name: 'example_name',
+                        total: 'amount'
+                    }
+                ]
+            }
+        """
+
+        response = model.generate_content(prompt_parts)
+        print(response.text)
+        if is_json(response.text):
+            res = json.loads(response.text) 
+        else:
+            response = model_text.generate_content([json_prompt,response.text])
             if is_json(response.text):
-               res = json.loads(response.text) 
-               print('success')
-               retry = 0
+                res = json.loads(response.text) 
             else:
-               retry =- 1
-               if(retry == 0):
-                  return jsonify({"error": "Could not read the image"})
+                return jsonify({"error": "Could not read the image"})
         return res
     
 def is_json(myjson):
