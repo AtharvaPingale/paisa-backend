@@ -1,10 +1,10 @@
 import os
-from flask import Flask, request, Response, g, render_template, jsonify
+from flask import Flask, request, jsonify
 import google.generativeai as genai
 import json
 
 from dotenv import load_dotenv
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 
 
 load_dotenv()
@@ -20,7 +20,7 @@ model = genai.GenerativeModel(model_name="gemini-pro-vision")
 
 @app.route('/', methods=['GET'])
 def hello_world():
-    return render_template("chat.html")
+    return jsonify({"message": "Hello from paisa"})
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -78,6 +78,7 @@ def chat():
             print(response.text)
             if is_json(response.text):
                res = json.loads(response.text) 
+               print('success')
                retry = 0
             else:
                retry =- 1
