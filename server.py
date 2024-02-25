@@ -72,6 +72,7 @@ def chat():
             image_parts[0]
         ]  
         retry = 3
+        res = "{}"
         while(retry > 0):
             response = model.generate_content(prompt_parts)
             print(response.text)
