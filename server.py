@@ -47,7 +47,7 @@ def chat():
             You are an expert in understanding invoices.
             You will receive a single input image as invoice &
             you will have to convert the invoice image into valid JSON format. 
-            If the image is not recognized as invoice, respond with black JSON object with the template format.
+            If the image is not recognized as invoice, respond with blank JSON object with the template format.
             Use the following key format for the response:
             {
                 store_name: 'name_of_the_store',
@@ -66,53 +66,42 @@ def chat():
                 ]
             }
             If any field is not found, leave it as blank. Do not add tax, balance, savings in items. Do not invent any items.
-            DO NOT include anything else other than the JSON, including any variable name and extra spaces. Also do not include 'json' at the start of the response.
+            DO NOT include anything else other than the JSON, including any variable name and extra white spaces. Also do not include 'json' at the start of the response.
             Do not include any string formatting.
             Wrap the answer in triple quotes (") to use in python and not in ticks (`).
             """,
             image_parts[0]
         ]  
 
-        json_prompt = """ 
-            The following response was not parsed as a JSON object. Reformat the response in JSON format.
-            Use the following key format for the JSON object:
-            {
-                store_name: 'name_of_the_store',
-                store_address: 'address_of_the_store',
-                subtotal: 'total_invoice_amount_including_tax',
-                tax: 'tax_in_the_receipt',    
-                invoice_date: "date_printed_on_invoice"
-                invoice_number: "invoice_unique_id",
-                invoice_time: "time_printed_on_invoice",
-                items:[
-                    {
-                        id: 'number_in_the_list',
-                        item_name: 'example_name',
-                        total: 'amount'
-                    }
-                ]
-            }
-            Modify the following JSON:
-        """
+        # json_prompt = """ 
+        #     The following response was not parsed as a JSON object. Reformat the response in JSON format.
+        #     Use the following key format for the JSON object:
+        #     {
+        #         store_name: 'name_of_the_store',
+        #         store_address: 'address_of_the_store',
+        #         subtotal: 'total_invoice_amount_including_tax',
+        #         tax: 'tax_in_the_receipt',    
+        #         invoice_date: "date_printed_on_invoice"
+        #         invoice_number: "invoice_unique_id",
+        #         invoice_time: "time_printed_on_invoice",
+        #         items:[
+        #             {
+        #                 id: 'number_in_the_list',
+        #                 item_name: 'example_name',
+        #                 total: 'amount'
+        #             }
+        #         ]
+        #     }
+        #     Modify the following JSON:
+        # """
 
         response = model.generate_content(prompt_parts)
         print(response.text)
-        if is_json(response.text):
-            res = json.loads(response.text) 
-        else:
-            response = model_text.generate_content([json_prompt,response.text])
-            if is_json(response.text):
-                res = json.loads(response.text) 
-            else:
-                return jsonify({"error": "Could not read the image"})
+        try:
+            res = json.loads(response.text.strip())
+        except ValueError as e:
+            return jsonify({"error": "Could not read the image"})
         return res
-    
-def is_json(myjson):
-  try:
-    json.loads(myjson)
-  except ValueError as e:
-    return False
-  return True
     
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
