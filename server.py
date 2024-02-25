@@ -4,6 +4,8 @@ import google.generativeai as genai
 import json
 
 from dotenv import load_dotenv
+from flask_cors import CORS, cross_origin
+
 
 load_dotenv()
 
@@ -11,6 +13,8 @@ genai.configure(api_key=os.getenv("API_KEY"))
 
 app = Flask(__name__)
 app.debug = True
+
+cors = CORS(app)
 
 model = genai.GenerativeModel(model_name="gemini-pro-vision")
 
